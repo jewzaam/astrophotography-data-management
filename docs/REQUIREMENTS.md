@@ -1,7 +1,10 @@
 # Astrophotography Data Management Requirements
 
 ## Overview
-This document outlines the requirements for a tool to manage astrophotography data across multiple years and projects, providing visibility into project states and workflow management.
+This document outlines the requirements for a **new tool** to manage astrophotography data across multiple years and projects, providing visibility into project states and workflow management.
+
+## Project Scope
+**This is a clean-slate project.** The new tool will be built from scratch without referencing or depending on existing code. Current Python scripts serve only as requirements analysis input and will be replaced entirely by the new implementation.
 
 ## Data Organization Structure
 
@@ -61,7 +64,34 @@ Each target has:
 
 ## Functional Requirements
 
-### Project State Management
+### RAW Data Processing (Initial Scope)
+**Process Flow**: Move first, then cull - executed as single batch operation.
+
+1. **NINA File Parsing**: Parse NINA-generated filenames to extract metadata including:
+   - Equipment: optic, camera, focal ratio
+   - Target: target name, panel info (from FITS headers)
+   - Session: date, filter, exposure time, temperature
+   - Quality: HFR, RMS, star count, sensor temperature
+
+2. **Rig-based Organization**: Sort files into appropriate rig directories using pattern `<Optics>@f<FocalRatio>+<Camera>`
+
+3. **File Movement**: Move files from RAW directory to `10_Blink` workflow directories
+   - Create target directory structure as needed
+   - Create `accept` subdirectories during move process
+   - Delete only empty RAW directories after successful moves
+
+4. **Filename Normalization**: Rename files to standardized format preserving all metadata
+
+5. **Quality-based Culling**: Filter images based on configurable thresholds per rig+target+panel+filter grouping:
+   - HFR threshold filtering
+   - RMS arcsec threshold filtering
+   - Group-based evaluation (not global bucket review)
+
+6. **Auto-rejection Logic**: Automatically reject poor images when rejection percentage below configurable threshold
+
+7. **Reject Management**: Move rejected files to parallel reject directory structure preserving the same relative directory organization for potential recovery
+
+### Project State Management (Future Scope)
 1. **State Visibility**: Provide clear indication of project status across all workflow stages
 2. **Work Queue Identification**: Identify projects ready for the next workflow step
 3. **Progress Tracking**: Track project movement through workflow stages
@@ -97,6 +127,45 @@ Each target has:
 - Present project status in human-readable format
 - Provide actionable workflow recommendations
 - Support batch operations on multiple projects
+
+## Open Questions
+
+### Configuration Management Strategy
+**Question**: How should rig-specific culling configurations be stored and managed?
+
+**Current State**: Configuration parameters are passed as batch script arguments:
+- `max_hfr`: Maximum Half Flux Radius threshold
+- `max_rms`: Maximum RMS arcseconds threshold  
+- `auto_yes_percent`: Auto-reject if rejects < this percentage
+- `srcdir`: Source directory path
+- `rejectdir`: Reject directory path
+
+**Options**:
+1. **Configuration Files**: YAML/JSON files per rig or global config file
+2. **Database Storage**: Add configuration tables to astrophotography.sqlite (matches existing schema pattern)
+3. **Hybrid Approach**: Database for dynamic configs, files for static settings
+
+**Considerations**:
+- Existing database has `camera`, `optic`, `profile` tables that could be extended
+- Configuration may vary by rig (optic+camera combination)
+- Need to maintain compatibility with current workflow
+
+**Impact**: Affects maintainability, sharing configurations between tools, and runtime flexibility.
+
+### File Conflict Handling
+**Question**: How should the system handle potential filename conflicts during file movement?
+
+**Current Assumption**: Conflicts are extremely unlikely due to:
+- NINA enforces uniqueness during capture
+- Timestamps and metadata in filenames provide natural uniqueness
+- Files are moved (not copied) from source
+
+**Consideration**: Should the system include conflict detection and resolution mechanisms as defensive programming, or rely on the assumption that conflicts cannot occur?
+
+**Options**:
+1. **No conflict handling** - Rely on NINA uniqueness guarantees
+2. **Detection only** - Detect and error on conflicts
+3. **Resolution strategies** - Timestamp suffixes, user prompts, etc.
 
 ## Future Considerations
 - Integration with PixInsight workflow

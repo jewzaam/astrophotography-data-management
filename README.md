@@ -24,7 +24,7 @@ Inside each rig directory, I have folders for each stage of a target's lifecycle
 
 - **00_Misc**: Special case directory (equivalent to Dark Library at camera level) for miscellaneous files and calibration frames
 - **10_Blink**: Anything I have not yet done a visual inspection of yet - need to blink through and accept/reject frames
-- **20_Data**: Add to Data Log - I keep a spreadsheet of all the data I have with goals per filter. Adding the data to the logs after blink makes it easy to decide what I want to shoot next
+- **20_Data**: Add to Data Log - I maintain a database of all the data I have with goals per filter. Adding the data to the database after blink makes it easy to decide what I want to shoot next
 - **30_Master**: Done collecting data, time to cut master lights. Projects can pile up so this way I don't forget I haven't done this step
 - **40_Process**: Working on processing a final image. I tend to think about the final image as well for a bit and keep the project around for PixInsight in case I want to fiddle with things after I'm "done"
 - **50_Bake**: I think I'm done processing but I probably am not. I put it here to remind me later to move it on to "done". I have not published this on astrobin yet
