@@ -167,6 +167,27 @@ Each target has:
 2. **Detection only** - Detect and error on conflicts
 3. **Resolution strategies** - Timestamp suffixes, user prompts, etc.
 
+### FITS Header Enhancement
+**Question**: Should quality metrics from NINA filename be written to FITS headers during file movement?
+
+**Current State**: NINA captures quality metrics (HFR, RMS, star count) in filename but NOT in FITS/XISF headers.
+
+**Enhancement Opportunity**: During RAW→Blink movement, extract quality metrics from filename and write them to FITS headers.
+
+**Benefits**:
+- Quality data preserved even if file is renamed
+- Complete reconstruction of directory path and filename from FITS headers alone
+- Metadata survives file operations and workflow changes
+- Better integration with FITS-aware tools
+
+**Considerations**:
+- FITS header standardization (which keywords to use)
+- File modification during move operation
+- Backward compatibility with existing tools
+- Performance impact of FITS header writing
+
+**Impact**: Enhances data durability and tool independence, but adds complexity to file movement process.
+
 ## Future Considerations
 - Integration with PixInsight workflow
 - Automated project progression
